@@ -70,6 +70,29 @@ export interface ReplayResponse {
   replay: ReplayEvent[];
 }
 
+export interface RatingPoint {
+  rating: number;
+  at: string;
+}
+
+export interface ProfileStats {
+  gamesPlayed: number;
+  wins: number;
+  losses: number;
+  winRate: number;
+}
+
+export interface ProfileDto {
+  userId: string;
+  username: string;
+  avatarId: string | null;
+  createdAt: string;
+  rating: number;
+  stats: ProfileStats;
+  ratingHistory: RatingPoint[];
+  recentGames: HistoryEntry[];
+}
+
 export interface ApiError {
   error: string;
   code?: string;

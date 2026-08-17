@@ -45,6 +45,7 @@ docs/
 | `apps/server/src/modules/ladder/` | Ranked ladder (ELO-style rating) REST endpoints |
 | `apps/server/src/modules/achievements/` | Achievement catalog + unlock status REST endpoint |
 | `apps/server/src/modules/results/` | Game-end stats: rating updates + achievement unlock logic |
+| `apps/server/src/modules/users/` | Public player profile endpoint (stats, rating history, recent games) |
 | `apps/server/src/lib/rating.ts` | ELO-style rating math (expected score, update) |
 | `apps/server/src/socket/` | Socket.IO auth + event wiring |
 | `apps/server/prisma/` | Schema, migrations, seed |
@@ -59,6 +60,7 @@ docs/
 | `apps/client/src/pages/LadderPage.tsx` | Ranked ladder leaderboard |
 | `apps/client/src/pages/AchievementsPage.tsx` | Achievement catalog with unlock status |
 | `apps/client/src/pages/ReplayPage.tsx` | Step-through match replay viewer |
+| `apps/client/src/pages/ProfilePage.tsx` | Player profile: stats, win rate, rating chart, recent games |
 | `apps/client/src/components/table/FeltTable.tsx` | Felt table with seats, center trick, kitty indicator |
 | `apps/client/src/components/table/Seat.tsx` | Seat badge: avatar, score, cards, dealer label, away state |
 | `apps/client/src/components/cards/PlayingCard.tsx` | Rounded, animated card |
@@ -96,7 +98,7 @@ Demo account after seeding: `demo@bidwhist.local` / `bidwhist-demo`.
 
 ```bash
 npm run typecheck   # tsc across all workspaces
-npm run test        # vitest (deck, evaluator, bidding, scoring, engine simulation, strategy, rating, game results, socket e2e)
+npm run test        # vitest (deck, evaluator, bidding, scoring, engine simulation, strategy, rating, game results, users profile, socket e2e)
 ```
 
 ## Security model
@@ -120,7 +122,19 @@ The complete catalog (names + payloads + security notes) is in
    match history UI, human avatar picker, table spectating.
 3. **Phase 3:** Bidding polish (bid history panel, dealer/kitty indicators),
    richer bot strategy (hand patterns, defensive trumping), end-to-end tests.
-4. **Phase 4 (this):** Match replay, achievements, ranked ladder.
+4. **Phase 4:** Match replay, achievements, ranked ladder.
+5. **Phase 5 (this):** Player profile & stats.
+
+### Phase 5 notes
+
+- **Player profiles:** `GET /api/users/:id` returns a public profile — identity
+  (username, avatar, member since), lifetime stats (games, wins, losses, win
+  rate), a 30-point rating history series, and the 10 most recent games.
+- **Rating history:** every finished game appends a `RatingHistory` row per
+  human player (new rating + timestamp), so profiles can chart rating over time.
+  Shown as a bar chart on the profile page.
+- **Wiring:** ladder rows and the lobby header link to `/users/:id` profiles;
+  your own profile is reachable via the "My Profile" button in the lobby.
 
 ### Phase 4 notes
 

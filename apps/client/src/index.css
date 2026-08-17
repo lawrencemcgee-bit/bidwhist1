@@ -1067,3 +1067,94 @@ select {
   line-height: 1;
 }
 
+/* ---------- phase 5: player profile & stats ---------- */
+
+.profile-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 16px;
+  padding: 1.2rem;
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.profile-identity {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.profile-identity h2 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.profile-identity span {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+}
+
+.profile-you {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.profile-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  gap: 0.6rem;
+}
+
+.profile-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.7rem;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--panel) 60%, #000);
+}
+
+.profile-stat strong {
+  font-size: 1.3rem;
+  color: var(--gold);
+}
+
+.profile-stat span {
+  color: var(--text-dim);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.profile-section h3 {
+  margin: 0 0 0.6rem;
+  font-size: 1rem;
+}
+
+.rating-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 120px;
+  padding: 0.4rem;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--panel) 60%, #000);
+}
+
+.rating-bar {
+  flex: 1;
+  min-width: 4px;
+  border-radius: 2px 2px 0 0;
+  background: linear-gradient(180deg, var(--gold), color-mix(in srgb, var(--gold) 55%, var(--accent)));
+}
+

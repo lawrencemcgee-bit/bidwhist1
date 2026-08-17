@@ -53,6 +53,13 @@ export function LobbyPage() {
           <AvatarPicker value={user?.avatarId} onChange={changeAvatar} />
           <span>{user?.username}</span>
           <span className="lobby-rating">rating {user?.rating ?? 1200}</span>
+          <button
+            className="btn btn-ghost"
+            onClick={() => user?.id && navigate(`/users/${user.id}`)}
+            disabled={!user?.id}
+          >
+            My Profile
+          </button>
           <button className="btn btn-ghost" onClick={() => navigate('/ladder')}>
             Ladder
           </button>

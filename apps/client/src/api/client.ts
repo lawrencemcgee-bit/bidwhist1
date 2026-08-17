@@ -3,6 +3,7 @@ import type {
   AuthResponse,
   HistoryEntry,
   LadderEntry,
+  ProfileDto,
   ReplayResponse,
   TableSummary,
   UserDto,
@@ -81,4 +82,5 @@ export const api = {
   listLadder: () => request<{ ladder: LadderEntry[] }>('/api/ladder'),
   myRank: () => request<{ rank: number }>('/api/ladder/me'),
   listAchievements: () => request<{ achievements: AchievementDto[] }>('/api/achievements'),
+  getProfile: (userId: string) => request<ProfileDto>(`/api/users/${userId}`),
 };

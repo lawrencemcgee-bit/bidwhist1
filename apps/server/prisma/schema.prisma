@@ -21,6 +21,18 @@ model User {
 
   tables       TablePlayer[]
   achievements UserAchievement[]
+  ratingHistory RatingHistory[]
+}
+
+model RatingHistory {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  rating    Int
+  changedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, changedAt])
 }
 
 model UserAchievement {

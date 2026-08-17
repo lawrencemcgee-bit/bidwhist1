@@ -119,6 +119,9 @@ export async function handleGameEnd(input: GameEndInput): Promise<GameEndOutcome
       where: { id: human.userId },
       data: { gamesPlayed, wins, rating },
     });
+    await prisma.ratingHistory.create({
+      data: { userId: human.userId, rating, changedAt: new Date() },
+    });
     updatedUsers.push({ userId: human.userId, gamesPlayed, wins, rating });
 
     const candidateIds = unlockedAchievementIds(human, {

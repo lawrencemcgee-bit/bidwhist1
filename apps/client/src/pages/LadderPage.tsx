@@ -42,6 +42,9 @@ export function LadderPage() {
                 rating {entry.rating} · {entry.gamesPlayed} games · {entry.wins} wins
               </span>
             </div>
+            <button className="btn btn-ghost" onClick={() => navigate(`/users/${entry.userId}`)}>
+              Profile
+            </button>
           </li>
         ))}
         {ladder.length === 0 && !error && (

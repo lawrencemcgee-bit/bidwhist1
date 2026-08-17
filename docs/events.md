@@ -95,7 +95,10 @@ dealer and kitty indicators in the felt table.
 | `GET /api/ladder` | none | Leaderboard ordered by rating desc, wins desc (`{ ladder: LadderEntry[] }`). |
 | `GET /api/ladder/me` | user | Your current rank (`{ rank }`, `0` if unranked). |
 | `GET /api/achievements` | user | Catalog + unlock status (`{ achievements: AchievementDto[] }`, `unlockedAt` is `null` when locked). |
+| `GET /api/users/:id` | user | Public player profile (`ProfileDto`): identity, lifetime stats (`gamesPlayed`, `wins`, `losses`, `winRate`), last 30 rating points, 10 recent games. |
 
 Replay logs are written at game end from the engine's recorded action log
 (`GameRecord.replay`), and rating/achievement updates run once per finished
-game in `apps/server/src/modules/results/gameResults.service.ts`.
+game in `apps/server/src/modules/results/gameResults.service.ts`. Rating
+changes also append a `RatingHistory` row per human player, which powers the
+profile page's rating chart.

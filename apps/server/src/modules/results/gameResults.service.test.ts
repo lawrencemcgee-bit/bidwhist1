@@ -9,10 +9,12 @@ const h = vi.hoisted(() => {
     ['u2', { id: 'u2', gamesPlayed: 0, wins: 0, rating: 1200 }],
   ]);
   const achievements: Array<Record<string, unknown>> = [];
+  const ratingHistory: Array<Record<string, unknown>> = [];
 
   return {
     users,
     achievements,
+    ratingHistory,
     prisma: {
       user: {
         findMany: async () => [...users.values()].map((row) => ({ ...row })),
@@ -34,6 +36,12 @@ const h = vi.hoisted(() => {
         createMany: async ({ data }: { data: Array<Record<string, unknown>> }) => {
           achievements.push(...data.map((d) => ({ ...d })));
           return { count: data.length };
+        },
+      },
+      ratingHistory: {
+        create: async ({ data }: { data: Record<string, unknown> }) => {
+          ratingHistory.push({ ...data });
+          return { ...data };
         },
       },
     },
@@ -75,6 +83,7 @@ beforeEach(() => {
   h.users.set('u1', { id: 'u1', gamesPlayed: 0, wins: 0, rating: 1200 });
   h.users.set('u2', { id: 'u2', gamesPlayed: 0, wins: 0, rating: 1200 });
   h.achievements.length = 0;
+  h.ratingHistory.length = 0;
 });
 
 describe('handleGameEnd', () => {
@@ -93,6 +102,30 @@ describe('handleGameEnd', () => {
     const u2 = h.users.get('u2')!.rating as number;
     expect(u1).toBeGreaterThan(1200);
     expect(u2).toBeLessThan(1200);
+  });
+
+  it('records a rating history point for each human player', async () => {
+    await handleGameEnd(input({ winnerPartnership: 0 }));
+
+    expect(h.ratingHistory).toHaveLength(2);
+    const u1Point = h.ratingHistory.find((p) => p.userId === 'u1');
+    const u2Point = h.ratingHistory.find((p) => p.userId === 'u2');
+    expect(u1Point?.rating).toBe(h.users.get('u1')!.rating);
+    expect(u2Point?.rating).toBe(h.users.get('u2')!.rating);
+  });
+
+  it('does not record rating history when there are no humans', async () => {
+    await handleGameEnd(
+      input({
+        seats: [
+          seat(0, null, 'bot', 'b1'),
+          seat(1, null, 'bot', 'b2'),
+          seat(2, null, 'bot', 'b3'),
+          seat(3, null, 'bot', 'b4'),
+        ],
+      }),
+    );
+    expect(h.ratingHistory).toHaveLength(0);
   });
 
   it('is a no-op when there are no human players', async () => {

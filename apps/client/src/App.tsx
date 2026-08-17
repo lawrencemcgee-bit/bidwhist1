@@ -10,6 +10,7 @@ import { HistoryPage } from './pages/HistoryPage';
 import { LadderPage } from './pages/LadderPage';
 import { AchievementsPage } from './pages/AchievementsPage';
 import { ReplayPage } from './pages/ReplayPage';
+import { ProfilePage } from './pages/ProfilePage';
 
 export function App() {
   const initialized = useAuth((s) => s.initialized);
@@ -52,6 +53,10 @@ export function App() {
           <Route
             path="/replay/:gameId"
             element={token ? <ReplayPage /> : <Navigate to="/login" replace />}
+          />
+          <Route
+            path="/users/:userId"
+            element={token ? <ProfilePage /> : <Navigate to="/login" replace />}
           />
           <Route
             path="/table/:tableId"

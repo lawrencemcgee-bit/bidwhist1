@@ -18,6 +18,7 @@ const h = vi.hoisted(() => {
     records: Record<string, unknown>[];
     users: Map<string, Record<string, unknown>>;
     achievements: Record<string, unknown>[];
+    ratingHistory: Record<string, unknown>[];
   } = {
     table: new Map([
       ['table-e2e', { id: 'table-e2e', name: 'E2E Table', ownerId: 'user-human', status: 'WAITING' }],
@@ -39,6 +40,7 @@ const h = vi.hoisted(() => {
       ],
     ]),
     achievements: [],
+    ratingHistory: [],
   };
 
   function matches(record: Record<string, unknown>, where: Record<string, unknown>): boolean {
@@ -130,6 +132,13 @@ const h = vi.hoisted(() => {
         }) => {
           store.achievements.push(...data);
           return { count: data.length };
+        },
+      },
+      ratingHistory: {
+        create: async ({ data }: { data: Record<string, unknown> }) => {
+          const row = { id: `rh-${store.ratingHistory.length}`, ...data };
+          store.ratingHistory.push(row);
+          return row;
         },
       },
     },
@@ -301,5 +310,7 @@ describe('socket end-to-end game', () => {
     expect(h.store.users.get('user-human')?.gamesPlayed).toBe(1);
     expect(h.store.users.get('user-human')?.wins).toBeGreaterThanOrEqual(0);
     expect(h.store.achievements.some((a) => a.achievementId === 'first-game')).toBe(true);
+    expect(h.store.ratingHistory.length).toBeGreaterThanOrEqual(1);
+    expect(h.store.ratingHistory[0]?.rating).toBeGreaterThanOrEqual(1100);
   }, 40000);
 });
