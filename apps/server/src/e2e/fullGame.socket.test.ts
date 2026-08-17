@@ -16,12 +16,29 @@ const h = vi.hoisted(() => {
     table: Map<string, Record<string, unknown>>;
     players: Map<string, Record<string, unknown>>;
     records: Record<string, unknown>[];
+    users: Map<string, Record<string, unknown>>;
+    achievements: Record<string, unknown>[];
   } = {
     table: new Map([
       ['table-e2e', { id: 'table-e2e', name: 'E2E Table', ownerId: 'user-human', status: 'WAITING' }],
     ]),
     players: new Map(),
     records: [],
+    users: new Map([
+      [
+        'user-human',
+        {
+          id: 'user-human',
+          email: 'human@example.com',
+          username: 'Human',
+          avatarId: 'human-blue',
+          gamesPlayed: 0,
+          wins: 0,
+          rating: 1200,
+        },
+      ],
+    ]),
+    achievements: [],
   };
 
   function matches(record: Record<string, unknown>, where: Record<string, unknown>): boolean {
@@ -67,6 +84,52 @@ const h = vi.hoisted(() => {
           const record = { id: `rec-${store.records.length}`, ...data };
           store.records.push(record);
           return record;
+        },
+      },
+      user: {
+        findMany: async ({
+          where,
+          select,
+        }: {
+          where?: { id?: { in: string[] } };
+          select?: Record<string, boolean>;
+        }) => {
+          let rows = [...store.users.values()];
+          if (where?.id?.in) rows = rows.filter((row) => where.id!.in!.includes(row.id as string));
+          if (select) {
+            rows = rows.map((row) =>
+              Object.fromEntries(Object.entries(row).filter(([key]) => select[key])),
+            );
+          }
+          return rows;
+        },
+        update: async ({
+          where,
+          data,
+        }: {
+          where: { id: string };
+          data: Record<string, unknown>;
+        }) => {
+          const row = store.users.get(where.id);
+          if (row) Object.assign(row, data);
+          return row;
+        },
+      },
+      userAchievement: {
+        findMany: async ({ where }: { where: { userId: string; achievementId?: { in: string[] } } }) => {
+          return store.achievements.filter(
+            (a) =>
+              a.userId === where.userId &&
+              (!where.achievementId?.in || where.achievementId.in.includes(a.achievementId as string)),
+          );
+        },
+        createMany: async ({
+          data,
+        }: {
+          data: Array<Record<string, unknown>>;
+        }) => {
+          store.achievements.push(...data);
+          return { count: data.length };
         },
       },
     },
@@ -232,5 +295,11 @@ describe('socket end-to-end game', () => {
     expect(maxTrick).toBeGreaterThan(1);
     expect(maxHandSeen).toBeGreaterThanOrEqual(13);
     expect(h.store.records.length).toBeGreaterThanOrEqual(1);
+    expect(h.store.records[0]?.replay).toBeDefined();
+
+    await waitFor(() => ((h.store.users.get('user-human')?.gamesPlayed as number) ?? 0) >= 1);
+    expect(h.store.users.get('user-human')?.gamesPlayed).toBe(1);
+    expect(h.store.users.get('user-human')?.wins).toBeGreaterThanOrEqual(0);
+    expect(h.store.achievements.some((a) => a.achievementId === 'first-game')).toBe(true);
   }, 40000);
 });

@@ -52,12 +52,20 @@ export function HistoryPage() {
                 ))}
               </span>
             </div>
-            <button
-              className="btn btn-secondary"
-              onClick={() => navigate(`/table/${entry.tableId}?spectate=1`)}
-            >
-              Spectate
-            </button>
+            <div className="table-actions">
+              <button
+                className="btn btn-secondary"
+                onClick={() => navigate(`/replay/${entry.id}`)}
+              >
+                Replay
+              </button>
+              <button
+                className="btn btn-secondary"
+                onClick={() => navigate(`/table/${entry.tableId}?spectate=1`)}
+              >
+                Spectate
+              </button>
+            </div>
           </li>
         ))}
         {history.length === 0 && !error && (

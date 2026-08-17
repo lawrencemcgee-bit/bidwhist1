@@ -7,6 +7,9 @@ import { RegisterPage } from './pages/RegisterPage';
 import { LobbyPage } from './pages/LobbyPage';
 import { TablePage } from './pages/TablePage';
 import { HistoryPage } from './pages/HistoryPage';
+import { LadderPage } from './pages/LadderPage';
+import { AchievementsPage } from './pages/AchievementsPage';
+import { ReplayPage } from './pages/ReplayPage';
 
 export function App() {
   const initialized = useAuth((s) => s.initialized);
@@ -37,6 +40,18 @@ export function App() {
           <Route
             path="/history"
             element={token ? <HistoryPage /> : <Navigate to="/login" replace />}
+          />
+          <Route
+            path="/ladder"
+            element={token ? <LadderPage /> : <Navigate to="/login" replace />}
+          />
+          <Route
+            path="/achievements"
+            element={token ? <AchievementsPage /> : <Navigate to="/login" replace />}
+          />
+          <Route
+            path="/replay/:gameId"
+            element={token ? <ReplayPage /> : <Navigate to="/login" replace />}
           />
           <Route
             path="/table/:tableId"

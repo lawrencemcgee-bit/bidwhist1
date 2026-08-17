@@ -1,4 +1,11 @@
-import { KITTY_SIZE, TRICKS_PER_HAND, type Bid, type Card, type Trump } from '@bidwhist/shared';
+import {
+  KITTY_SIZE,
+  TRICKS_PER_HAND,
+  type Bid,
+  type Card,
+  type ReplayEvent,
+  type Trump,
+} from '@bidwhist/shared';
 import type { EngineEvent, EngineListener } from './events.js';
 import type { EngineSeatState, EngineState, PlayedCard, SeatIndex, SeatPlayer } from './types.js';
 import { deal, mulberry32, type Rng } from './deck.js';
@@ -23,6 +30,7 @@ export class GameEngine {
   private state: EngineState;
   private rng: Rng;
   private listeners: EngineListener[] = [];
+  private replay: ReplayEvent[] = [];
 
   constructor(players: SeatPlayer[], options: EngineOptions = {}) {
     this.rng = mulberry32(options.seed ?? Date.now());
@@ -82,6 +90,10 @@ export class GameEngine {
     return this.state.seats[seat]!.hand.map((c) => ({ ...c }));
   }
 
+  getReplay(): ReplayEvent[] {
+    return this.replay.map((event) => structuredClone(event));
+  }
+
   startHand(): EngineState {
     const s = this.state;
     if (s.phase !== 'WAITING' && s.phase !== 'HAND_OVER' && s.phase !== 'BIDDING') {
@@ -115,6 +127,13 @@ export class GameEngine {
     s.trickNumber = 1;
 
     this.emit({ type: 'deal', handNumber: s.handNumber, dealerSeat, kittyCount: kitty.length });
+    this.replay.push({
+      type: 'deal',
+      handNumber: s.handNumber,
+      dealerSeat,
+      hands: hands.map((hand) => hand.map((c) => ({ ...c }))),
+      kitty: kitty.map((c) => ({ ...c })),
+    });
 
     s.phase = 'BIDDING';
     s.currentBidder = openBidder(dealerSeat);
@@ -135,10 +154,12 @@ export class GameEngine {
     s.biddingHistory.push({ seat, bid });
     if (bid === null) {
       this.emit({ type: 'bid:passed', seat });
+      this.replay.push({ type: 'bid:passed', seat });
     } else {
       s.highestBid = bid;
       s.lastBidder = seat;
       this.emit({ type: 'bid:made', seat, bid });
+      this.replay.push({ type: 'bid:made', seat, bid });
     }
 
     const passesInARow = this.consecutivePasses();
@@ -176,6 +197,7 @@ export class GameEngine {
       s.seats[partner]!.hand.push(...discarded);
       s.currentDiscarder = partner;
       this.emit({ type: 'discard:made', seat, cardIds, passedToSeat: partner });
+      this.replay.push({ type: 'discard:made', seat, cardIds, passedToSeat: partner });
       this.emit({ type: 'discard:turn', seat: partner, kittyReveal: false, kitty: [] });
       return;
     }
@@ -184,6 +206,7 @@ export class GameEngine {
     s.pendingPassCards = [];
     s.currentDiscarder = null;
     this.emit({ type: 'discard:made', seat, cardIds, passedToSeat: null });
+    this.replay.push({ type: 'discard:made', seat, cardIds, passedToSeat: null });
     this.startPlay();
   }
 
@@ -208,12 +231,19 @@ export class GameEngine {
     seatState.hand = seatState.hand.filter((c) => c.id !== cardId);
     s.currentTrick.push({ seat, card });
     this.emit({ type: 'card:played', played: { seat, card }, handSize: seatState.hand.length });
+    this.replay.push({ type: 'card:played', seat, card: { ...card } });
 
     if (s.currentTrick.length === 4) {
       const winner = resolveTrick(s.currentTrick, s.trump as Trump);
       s.seats[winner]!.tricksTaken += 1;
       const completed = [...s.currentTrick];
       this.emit({ type: 'trick:won', winnerSeat: winner, trickNumber: s.trickNumber, cards: completed });
+      this.replay.push({
+        type: 'trick:won',
+        winnerSeat: winner,
+        trickNumber: s.trickNumber,
+        cards: completed.map((p) => ({ seat: p.seat, card: { ...p.card } })),
+      });
 
       if (s.trickNumber >= TRICKS_PER_HAND) {
         this.endHand();
@@ -240,6 +270,7 @@ export class GameEngine {
     s.phase = 'DISCARDING';
     s.currentDiscarder = declarerSeat;
     this.emit({ type: 'bid:ended', declarerSeat, bid, trump });
+    this.replay.push({ type: 'bid:ended', declarerSeat, bid, trump });
     this.emit({
       type: 'discard:turn',
       seat: declarerSeat,
@@ -277,6 +308,7 @@ export class GameEngine {
     s.scores = result.scores;
     s.phase = 'HAND_OVER';
     this.emit({ type: 'hand:ended', result });
+    this.replay.push({ type: 'hand:ended', result });
 
     if (result.winnerPartnership !== null) {
       s.phase = 'GAME_OVER';

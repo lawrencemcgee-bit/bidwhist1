@@ -86,3 +86,16 @@ reconstructing it from the `bid:made` / `bid:passed` events. It is reset at the
 start of every hand. `TableState.dealerSeat` and `TableState.kittyCount`
 (2 during the auction, `0` once the declarer picks up the kitty) drive the
 dealer and kitty indicators in the felt table.
+
+## Phase 4 REST additions
+
+| Endpoint | Auth | Purpose |
+| -------- | ---- | ------- |
+| `GET /api/history/:id/replay` | user | Returns the full action log for a finished game you played or owned (`{ gameId, tableName, playedAt, players, replay: ReplayEvent[] }`). `ReplayEvent` is a discriminated union (`deal`, `bid:made`, `bid:passed`, `bid:ended`, `discard:made`, `card:played`, `trick:won`, `hand:ended`). |
+| `GET /api/ladder` | none | Leaderboard ordered by rating desc, wins desc (`{ ladder: LadderEntry[] }`). |
+| `GET /api/ladder/me` | user | Your current rank (`{ rank }`, `0` if unranked). |
+| `GET /api/achievements` | user | Catalog + unlock status (`{ achievements: AchievementDto[] }`, `unlockedAt` is `null` when locked). |
+
+Replay logs are written at game end from the engine's recorded action log
+(`GameRecord.replay`), and rating/achievement updates run once per finished
+game in `apps/server/src/modules/results/gameResults.service.ts`.

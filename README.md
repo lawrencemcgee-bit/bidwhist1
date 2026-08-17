@@ -41,7 +41,11 @@ docs/
 | `apps/server/src/bots/` | Avatars, personalities, chat lines, hand-pattern bidding, defensive trumping strategy |
 | `apps/server/src/modules/auth/` | Register / login / logout / me / avatar (JWT) |
 | `apps/server/src/modules/lobby/` | Table REST endpoints |
-| `apps/server/src/modules/history/` | Persisted match history REST endpoint |
+| `apps/server/src/modules/history/` | Persisted match history + replay log REST endpoints |
+| `apps/server/src/modules/ladder/` | Ranked ladder (ELO-style rating) REST endpoints |
+| `apps/server/src/modules/achievements/` | Achievement catalog + unlock status REST endpoint |
+| `apps/server/src/modules/results/` | Game-end stats: rating updates + achievement unlock logic |
+| `apps/server/src/lib/rating.ts` | ELO-style rating math (expected score, update) |
 | `apps/server/src/socket/` | Socket.IO auth + event wiring |
 | `apps/server/prisma/` | Schema, migrations, seed |
 
@@ -50,8 +54,11 @@ docs/
 | Path | Purpose |
 | ---- | ------- |
 | `apps/client/src/pages/TablePage.tsx` | Live table: felt, hand, bidding, discarding, chat, spectator mode |
-| `apps/client/src/pages/LobbyPage.tsx` | Table list, create table, avatar picker, spectate links |
-| `apps/client/src/pages/HistoryPage.tsx` | Persisted match history with per-table spectate |
+| `apps/client/src/pages/LobbyPage.tsx` | Table list, create table, avatar picker, spectate links, rating |
+| `apps/client/src/pages/HistoryPage.tsx` | Persisted match history with replay + spectate links |
+| `apps/client/src/pages/LadderPage.tsx` | Ranked ladder leaderboard |
+| `apps/client/src/pages/AchievementsPage.tsx` | Achievement catalog with unlock status |
+| `apps/client/src/pages/ReplayPage.tsx` | Step-through match replay viewer |
 | `apps/client/src/components/table/FeltTable.tsx` | Felt table with seats, center trick, kitty indicator |
 | `apps/client/src/components/table/Seat.tsx` | Seat badge: avatar, score, cards, dealer label, away state |
 | `apps/client/src/components/cards/PlayingCard.tsx` | Rounded, animated card |
@@ -89,7 +96,7 @@ Demo account after seeding: `demo@bidwhist.local` / `bidwhist-demo`.
 
 ```bash
 npm run typecheck   # tsc across all workspaces
-npm run test        # vitest (deck, evaluator, bidding, scoring, engine simulation, strategy, socket e2e)
+npm run test        # vitest (deck, evaluator, bidding, scoring, engine simulation, strategy, rating, game results, socket e2e)
 ```
 
 ## Security model
@@ -111,10 +118,28 @@ The complete catalog (names + payloads + security notes) is in
    table UI, sound hooks.
 2. **Phase 2:** Reconnect/resume with automatic bot takeover, persisted
    match history UI, human avatar picker, table spectating.
-3. **Phase 3 (this):** Bidding polish (bid history panel, dealer/kitty
-   indicators), richer bot strategy (hand patterns, defensive trumping),
-   end-to-end tests.
-4. **Phase 4:** Match replay, achievements, ranked ladder.
+3. **Phase 3:** Bidding polish (bid history panel, dealer/kitty indicators),
+   richer bot strategy (hand patterns, defensive trumping), end-to-end tests.
+4. **Phase 4 (this):** Match replay, achievements, ranked ladder.
+
+### Phase 4 notes
+
+- **Match replay:** The engine records a full action log (`deal` with all four
+  hands + kitty, bids, discards, plays, trick winners, hand results). Finished
+  games persist this log on `GameRecord.replay`, served at
+  `GET /api/history/:id/replay` and rendered by a step-through viewer at
+  `/replay/:id` with play/pause, step, and speed controls.
+- **Achievements:** 8 achievements (`first-game`, `games-10`, `games-50`,
+  `first-win`, `wins-10`, `big-bid`, `fast-start`, `shutout`) are tracked on
+  game end and stored in `UserAchievement`. The catalog + unlock status is
+  served at `GET /api/achievements` and shown at `/achievements`.
+- **Ranked ladder:** Every finished game updates each human player's rating
+  (ELO-style, K=24, starting 1200) plus `gamesPlayed`/`wins` counters on
+  `User`. `GET /api/ladder` returns the leaderboard, `/ladder` renders it,
+  and the lobby header shows your current rating.
+- **Server-authoritative scoring:** rating and achievement updates run in
+  `apps/server/src/modules/results/gameResults.service.ts`, invoked after a
+  game finishes, and are idempotent (achievements never double-unlock).
 
 ### Phase 3 notes
 

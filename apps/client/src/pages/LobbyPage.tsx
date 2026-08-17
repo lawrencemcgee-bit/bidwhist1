@@ -52,6 +52,13 @@ export function LobbyPage() {
         <div className="lobby-user">
           <AvatarPicker value={user?.avatarId} onChange={changeAvatar} />
           <span>{user?.username}</span>
+          <span className="lobby-rating">rating {user?.rating ?? 1200}</span>
+          <button className="btn btn-ghost" onClick={() => navigate('/ladder')}>
+            Ladder
+          </button>
+          <button className="btn btn-ghost" onClick={() => navigate('/achievements')}>
+            Achievements
+          </button>
           <button className="btn btn-ghost" onClick={() => navigate('/history')}>
             History
           </button>

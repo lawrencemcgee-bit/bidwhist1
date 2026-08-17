@@ -1,4 +1,12 @@
-import type { AuthResponse, HistoryEntry, TableSummary, UserDto } from '@bidwhist/shared';
+import type {
+  AchievementDto,
+  AuthResponse,
+  HistoryEntry,
+  LadderEntry,
+  ReplayResponse,
+  TableSummary,
+  UserDto,
+} from '@bidwhist/shared';
 import { API_BASE } from '../config.js';
 
 export class ApiError extends Error {
@@ -69,4 +77,8 @@ export const api = {
   getTable: (id: string) => request<{ table: TableSummary }>(`/api/tables/${id}`),
   listHistory: (limit = 50) =>
     request<{ history: HistoryEntry[] }>(`/api/history?limit=${limit}`),
+  getReplay: (gameId: string) => request<ReplayResponse>(`/api/history/${gameId}/replay`),
+  listLadder: () => request<{ ladder: LadderEntry[] }>('/api/ladder'),
+  myRank: () => request<{ rank: number }>('/api/ladder/me'),
+  listAchievements: () => request<{ achievements: AchievementDto[] }>('/api/achievements'),
 };

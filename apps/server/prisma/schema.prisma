@@ -8,15 +8,30 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid()) @db.Uuid
-  email     String   @unique
-  username  String   @unique
-  password  String
-  avatarId  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(uuid()) @db.Uuid
+  email       String   @unique
+  username    String   @unique
+  password    String
+  avatarId    String?
+  gamesPlayed Int      @default(0)
+  wins        Int      @default(0)
+  rating      Int      @default(1200)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  tables TablePlayer[]
+  tables       TablePlayer[]
+  achievements UserAchievement[]
+}
+
+model UserAchievement {
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String   @db.Uuid
+  achievementId String
+  unlockedAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
 }
 
 model Table {
@@ -56,6 +71,7 @@ model GameRecord {
   scores      Json
   handsPlayed Int
   players     Json?
+  replay      Json?
   playedAt    DateTime @default(now())
 
   table Table @relation(fields: [tableId], references: [id], onDelete: Cascade)

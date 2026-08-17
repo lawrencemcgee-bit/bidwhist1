@@ -6,11 +6,29 @@ import { signToken } from '../../lib/jwt.js';
 import { hashPassword, verifyPassword } from '../../lib/passwords.js';
 import type { LoginInput, RegisterInput } from './auth.validators.js';
 
-function toUserDto(row: { id: string; email: string; username: string; avatarId: string | null }): UserDto {
-  return { id: row.id, email: row.email, username: row.username, avatarId: row.avatarId };
+type UserRow = {
+  id: string;
+  email: string;
+  username: string;
+  avatarId: string | null;
+  gamesPlayed: number;
+  wins: number;
+  rating: number;
+};
+
+function toUserDto(row: UserRow): UserDto {
+  return {
+    id: row.id,
+    email: row.email,
+    username: row.username,
+    avatarId: row.avatarId,
+    gamesPlayed: row.gamesPlayed,
+    wins: row.wins,
+    rating: row.rating,
+  };
 }
 
-function toAuthResponse(row: { id: string; email: string; username: string; avatarId: string | null }): AuthResponse {
+function toAuthResponse(row: UserRow): AuthResponse {
   return {
     token: signToken({ sub: row.id, email: row.email, username: row.username }),
     user: toUserDto(row),
@@ -57,7 +75,7 @@ export async function login(input: LoginInput): Promise<AuthResponse> {
 export async function getUserById(id: string): Promise<UserDto | null> {
   const user = await prisma.user.findUnique({
     where: { id },
-    select: { id: true, email: true, username: true, avatarId: true },
+    select: { id: true, email: true, username: true, avatarId: true, gamesPlayed: true, wins: true, rating: true },
   });
   return user ? toUserDto(user) : null;
 }
@@ -66,7 +84,7 @@ export async function updateAvatar(id: string, avatarId: string): Promise<UserDt
   const user = await prisma.user.update({
     where: { id },
     data: { avatarId },
-    select: { id: true, email: true, username: true, avatarId: true },
+    select: { id: true, email: true, username: true, avatarId: true, gamesPlayed: true, wins: true, rating: true },
   });
   return toUserDto(user);
 }

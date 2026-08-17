@@ -6,6 +6,7 @@ import {
   type BidActionPayload,
   type PlayerKind,
   type PlayerSnapshot,
+  type ReplayEvent,
   type SeatIndex,
   type TableState,
 } from '@bidwhist/shared';
@@ -17,6 +18,7 @@ import type { SeatPlayer } from './types.js';
 import { BotController, type BotHost } from '../bots/botController.js';
 import { getBotProfile, pickBotProfile, type BotProfile } from '../bots/avatars.js';
 import { mulberry32 } from './deck.js';
+import { handleGameEnd, type GameSeatResult } from '../modules/results/gameResults.service.js';
 
 export interface TableSeat {
   seat: SeatIndex;
@@ -616,11 +618,14 @@ export class TableRuntime implements BotHost {
       if (!s) return null;
       return {
         seat: s.seat,
+        userId: s.userId,
         username: s.username,
         kind: s.kind,
         avatarId: s.avatarId,
+        botProfileId: s.kind === 'bot' ? (s.botProfileId ?? null) : null,
       };
     });
+    const replay = this.engine?.getReplay() ?? [];
     await prisma.gameRecord.create({
       data: {
         tableId: this.tableId,
@@ -628,8 +633,31 @@ export class TableRuntime implements BotHost {
         scores: scores as unknown as object,
         handsPlayed: this.engine?.getState().handNumber ?? 0,
         players: players.filter((p) => p !== null) as object,
+        replay: replay as object,
       },
     });
     await prisma.table.update({ where: { id: this.tableId }, data: { status: 'FINISHED' } });
+
+    void this.updatePlayerStats({
+      winnerPartnership,
+      scores,
+      handsPlayed: this.engine?.getState().handNumber ?? 0,
+      replay,
+      seats: players.filter((p) => p !== null) as unknown as GameSeatResult[],
+    });
+  }
+
+  private async updatePlayerStats(input: {
+    winnerPartnership: 0 | 1;
+    scores: [number, number, number, number];
+    handsPlayed: number;
+    replay: ReplayEvent[];
+    seats: GameSeatResult[];
+  }): Promise<void> {
+    try {
+      await handleGameEnd(input);
+    } catch (err) {
+      console.error('[table] failed to update player stats', err);
+    }
   }
 }

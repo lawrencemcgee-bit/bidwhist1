@@ -1,8 +1,13 @@
+import type { ReplayEvent } from './game.js';
+
 export interface UserDto {
   id: string;
   email: string;
   username: string;
   avatarId: string | null;
+  gamesPlayed: number;
+  wins: number;
+  rating: number;
 }
 
 export interface AuthResponse {
@@ -38,6 +43,31 @@ export interface HistoryEntry {
   winnerLabel: string;
   scores: number[];
   players: HistoryPlayer[];
+}
+
+export interface AchievementDto {
+  id: string;
+  name: string;
+  description: string;
+  unlockedAt: string | null;
+}
+
+export interface LadderEntry {
+  rank: number;
+  userId: string;
+  username: string;
+  avatarId: string | null;
+  rating: number;
+  gamesPlayed: number;
+  wins: number;
+}
+
+export interface ReplayResponse {
+  gameId: string;
+  tableName: string;
+  playedAt: string;
+  players: HistoryPlayer[];
+  replay: ReplayEvent[];
 }
 
 export interface ApiError {

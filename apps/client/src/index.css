@@ -919,3 +919,151 @@ select {
     height: 420px;
   }
 }
+
+/* ---------- phase 4: lobby rating / ladder / achievements / replay ---------- */
+
+.lobby-rating {
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.ladder-rank {
+  font-weight: 800;
+  color: var(--gold);
+}
+
+.ladder-list .history-row,
+.achievement-list .history-row {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.is-me {
+  outline: 1px solid var(--accent);
+}
+
+.achievement-summary {
+  color: var(--text-dim);
+  margin: 0 0 0.6rem;
+}
+
+.achievement-icon {
+  font-size: 1.4rem;
+  color: var(--text-dim);
+}
+
+.achievement-unlocked .achievement-icon {
+  color: var(--gold);
+}
+
+.achievement-unlocked {
+  border-color: color-mix(in srgb, var(--gold) 45%, var(--panel-border));
+}
+
+.achievement-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  flex: 1;
+}
+
+.achievement-text strong {
+  font-size: 0.95rem;
+}
+
+.achievement-text span {
+  color: var(--text-dim);
+  font-size: 0.8rem;
+}
+
+.achievement-date {
+  color: var(--text-dim);
+  font-size: 0.75rem;
+}
+
+.replay-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.replay-speed {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  color: var(--text);
+  padding: 0.45rem 0.6rem;
+}
+
+.replay-progress {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  margin-left: auto;
+}
+
+.replay-board {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 16px;
+  padding: 1.2rem;
+}
+
+.replay-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+.replay-scores {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.replay-bids {
+  margin: 0;
+}
+
+.replay-seats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.8rem;
+}
+
+.replay-seat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--panel) 60%, #000);
+}
+
+.replay-seat.is-declarer {
+  border-color: var(--gold);
+}
+
+.replay-seat-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.replay-empty-card {
+  color: var(--text-dim);
+  font-size: 1.2rem;
+  line-height: 1;
+}
+

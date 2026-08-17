@@ -62,3 +62,13 @@ export interface HandEndedResult {
   scores: [number, number, number, number];
   winnerPartnership: 0 | 1 | null;
 }
+
+export type ReplayEvent =
+  | { type: 'deal'; handNumber: number; dealerSeat: SeatIndex; hands: Card[][]; kitty: Card[] }
+  | { type: 'bid:made'; seat: SeatIndex; bid: Bid }
+  | { type: 'bid:passed'; seat: SeatIndex }
+  | { type: 'bid:ended'; declarerSeat: SeatIndex; bid: Bid; trump: Trump }
+  | { type: 'discard:made'; seat: SeatIndex; cardIds: string[]; passedToSeat: SeatIndex | null }
+  | { type: 'card:played'; seat: SeatIndex; card: Card }
+  | { type: 'trick:won'; winnerSeat: SeatIndex; trickNumber: number; cards: PlayedCard[] }
+  | { type: 'hand:ended'; result: HandEndedResult };
