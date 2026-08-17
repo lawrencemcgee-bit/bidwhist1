@@ -43,7 +43,7 @@ function simulate(seed: number): { engine: GameEngine; moves: number } {
       const hand = s.seats[seat]!.hand;
       const lead = s.currentTrick.length > 0 ? leadSuitOf(s.currentTrick[0]!.card) : null;
       const legal = legalPlays(hand, lead);
-      const cardId = choosePlay(hand, legal, s.currentTrick, s.trump as Trump, seat, traits, rng);
+      const cardId = choosePlay(hand, legal, s.currentTrick, s.trump as Trump, seat, traits, rng, s.trickNumber);
       engine.playCard(seat, cardId);
     }
   }

@@ -20,6 +20,7 @@ export function Seat({ player, isMySeat, isDealer, isActive, position }: SeatPro
         </span>
         <span className="seat-stats">
           score {player.score} · {player.handSize} cards
+          {isDealer && <span className="seat-role">dealer</span>}
         </span>
       </div>
       {player.away && <span className="seat-away">away</span>}

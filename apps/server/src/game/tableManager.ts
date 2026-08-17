@@ -423,6 +423,7 @@ export class TableRuntime implements BotHost {
       currentDiscarder: state?.currentDiscarder ?? null,
       currentPlayer: state?.currentPlayer ?? null,
       currentTrick: state?.currentTrick ?? [],
+      biddingHistory: state?.biddingHistory ?? [],
       highestBid: state?.highestBid ?? null,
       declarerSeat: state?.declarerSeat ?? null,
       trump: state?.trump ?? null,

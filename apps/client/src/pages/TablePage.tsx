@@ -235,6 +235,29 @@ export function TablePage() {
             </p>
           )}
 
+          {phase === 'BIDDING' && state && state.biddingHistory.length > 0 && (
+            <div className="bid-history">
+              <span className="bid-history-title">Auction</span>
+              <ul className="bid-history-list">
+                {state.biddingHistory.map((entry, i) => (
+                  <li
+                    key={i}
+                    className={`bid-entry ${entry.bid === null ? 'bid-pass' : 'bid-raise'}`}
+                  >
+                    <span className="bid-entry-name">
+                      {state.players[entry.seat]?.username ?? `Seat ${entry.seat + 1}`}
+                    </span>
+                    <span className="bid-entry-action">
+                      {entry.bid === null
+                        ? 'Pass'
+                        : `${entry.bid.tricks} ${DENOM_LABEL[entry.bid.denomination]}`}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           {myBidTurn && bidDraft && !isSpectating && (
             <div className="bid-panel">
               <div className="bid-tricks">

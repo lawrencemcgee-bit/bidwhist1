@@ -32,6 +32,17 @@ export function FeltTable({ state, mySeat }: FeltTableProps) {
           </div>
         )}
 
+        {state.kittyCount > 0 && (
+          <div className="kitty-indicator">
+            <span className="kitty-label">kitty</span>
+            <div className="kitty-cards">
+              {Array.from({ length: state.kittyCount }).map((_, i) => (
+                <div key={i} className="kitty-card" />
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="trick-area">
           {seats.map((seat) => {
             const plays = state.currentTrick.filter((p) => p.seat === seat);

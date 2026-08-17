@@ -23,6 +23,11 @@ export interface PlayedCard {
   card: Card;
 }
 
+export interface BiddingEntry {
+  seat: SeatIndex;
+  bid: Bid | null;
+}
+
 export interface TableState {
   tableId: string;
   name: string;
@@ -38,6 +43,7 @@ export interface TableState {
   currentDiscarder: SeatIndex | null;
   currentPlayer: SeatIndex | null;
   currentTrick: PlayedCard[];
+  biddingHistory: BiddingEntry[];
   highestBid: Bid | null;
   declarerSeat: SeatIndex | null;
   trump: Trump | null;

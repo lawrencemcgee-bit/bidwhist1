@@ -107,6 +107,7 @@ export class BotController {
         this.seatNumber,
         PERSONALITY_TRAITS[this.profile.personality],
         this.rng,
+        state.trickNumber,
       );
       engine.playCard(this.seatNumber, cardId);
       return;

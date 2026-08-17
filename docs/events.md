@@ -32,7 +32,7 @@ Broadcast events go to every socket in the table room. `table:state` and
 
 | Event | Payload | Audience | Trigger |
 | ----- | ------- | -------- | ------- |
-| `table:state` | `TableState` (public view, includes `spectators`) | seat + room + spectators | Initial snapshot, seat/status changes, every game transition. |
+| `table:state` | `TableState` (public view, includes `spectators`, `biddingHistory`) | seat + room + spectators | Initial snapshot, seat/status changes, every game transition. |
 | `table:private` | `{ hand: Card[] }` | specific seat | Your hidden hand after a deal or kitty resolution. Emitted again to a reconnecting owner socket. |
 | `table:player-joined` | `PlayerSnapshot` | room | A human or bot occupied a seat. |
 | `table:player-left` | `{ seat }` | room | A human disconnected (a bot may take over). |
@@ -76,3 +76,13 @@ Broadcast events go to every socket in the table room. `table:state` and
 - Kitty contents are only revealed to the declarer at kitty resolution.
 - Takeover bot actions are validated by the engine exactly like human actions;
   a bot never receives another player's hidden hand.
+
+## Bidding state
+
+`TableState.biddingHistory` mirrors the engine's per-hand auction log
+(`Array<{ seat, bid }>` where `bid` is `null` for a pass). It is public (bids
+are open information) and lets clients render an auction panel without
+reconstructing it from the `bid:made` / `bid:passed` events. It is reset at the
+start of every hand. `TableState.dealerSeat` and `TableState.kittyCount`
+(2 during the auction, `0` once the declarer picks up the kitty) drive the
+dealer and kitty indicators in the felt table.

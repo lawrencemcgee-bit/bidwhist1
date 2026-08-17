@@ -38,7 +38,7 @@ docs/
 | `apps/server/src/game/evaluator.ts` | Follow-suit enforcement and trick resolution |
 | `apps/server/src/game/scoring.ts` | Partnership scoring to 7 |
 | `apps/server/src/game/tableManager.ts` | Runtime table orchestration (engine + sockets + bots + DB) |
-| `apps/server/src/bots/` | Avatars, personalities, chat lines, deterministic strategy |
+| `apps/server/src/bots/` | Avatars, personalities, chat lines, hand-pattern bidding, defensive trumping strategy |
 | `apps/server/src/modules/auth/` | Register / login / logout / me / avatar (JWT) |
 | `apps/server/src/modules/lobby/` | Table REST endpoints |
 | `apps/server/src/modules/history/` | Persisted match history REST endpoint |
@@ -52,7 +52,8 @@ docs/
 | `apps/client/src/pages/TablePage.tsx` | Live table: felt, hand, bidding, discarding, chat, spectator mode |
 | `apps/client/src/pages/LobbyPage.tsx` | Table list, create table, avatar picker, spectate links |
 | `apps/client/src/pages/HistoryPage.tsx` | Persisted match history with per-table spectate |
-| `apps/client/src/components/table/FeltTable.tsx` | Felt table with seats and center trick |
+| `apps/client/src/components/table/FeltTable.tsx` | Felt table with seats, center trick, kitty indicator |
+| `apps/client/src/components/table/Seat.tsx` | Seat badge: avatar, score, cards, dealer label, away state |
 | `apps/client/src/components/cards/PlayingCard.tsx` | Rounded, animated card |
 | `apps/client/src/components/sound/` | Web Audio synthesized shuffle / placement / trick / bid + ambience |
 | `apps/client/src/store/` | Zustand stores for auth and live table state |
@@ -88,7 +89,7 @@ Demo account after seeding: `demo@bidwhist.local` / `bidwhist-demo`.
 
 ```bash
 npm run typecheck   # tsc across all workspaces
-npm run test        # vitest (deck, evaluator, bidding, scoring, engine simulation)
+npm run test        # vitest (deck, evaluator, bidding, scoring, engine simulation, strategy, socket e2e)
 ```
 
 ## Security model
@@ -108,11 +109,28 @@ The complete catalog (names + payloads + security notes) is in
 
 1. **Phase 1:** Monorepo, auth, lobby, engine skeleton, sockets, bots, felt
    table UI, sound hooks.
-2. **Phase 2 (this):** Reconnect/resume with automatic bot takeover, persisted
+2. **Phase 2:** Reconnect/resume with automatic bot takeover, persisted
    match history UI, human avatar picker, table spectating.
-3. **Phase 3:** Bidding polish (bid history panel, dealer/kitty indicators),
-   richer bot strategy (hand patterns, defensive trumping), end-to-end tests.
+3. **Phase 3 (this):** Bidding polish (bid history panel, dealer/kitty
+   indicators), richer bot strategy (hand patterns, defensive trumping),
+   end-to-end tests.
 4. **Phase 4:** Match replay, achievements, ranked ladder.
+
+### Phase 3 notes
+
+- **Bid history panel:** `TableState` now carries the per-hand auction log
+  (`biddingHistory`), rendered as an "Auction" panel while bidding is open.
+- **Dealer / kitty indicators:** seats show a "dealer" badge, and the felt
+  shows a face-down 2-card kitty during the auction (hidden until the declarer
+  picks it up).
+- **Bot strategy:** bidding evaluates hand patterns (trump length, voids,
+  singletons, doubletons, honor concentration, NT long suits / stoppers) via
+  `analyzeHand`, and play decides defensive ruffs by personality, trump
+  richness, and trick number — cautious bots preserve trumps early.
+- **End-to-end test:** `src/e2e/fullGame.socket.test.ts` boots the real HTTP +
+  Socket.IO server against an in-memory Prisma mock, plays a full game over
+  the wire with one auto-driven human and three live bots, and asserts the
+  public state (finished, bidding history, dealer, kitty, >1 tricks).
 
 ### Phase 2 notes
 
